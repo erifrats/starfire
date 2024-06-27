@@ -1,0 +1,12 @@
+{
+    "nixEnvSelector.nixFile": "${workspaceFolder}/default.nix",
+    "nix.enableLanguageServer": true,
+    "nix.serverPath": "nil",
+    "nix.serverSettings": {
+        "nil": {
+            "formatting": {
+                "command": [ "alejandra" ]
+            }
+        }
+    }
+}

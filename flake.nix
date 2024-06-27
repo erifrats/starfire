@@ -43,57 +43,70 @@
       flake-options = builtins.removeAttrs flake-and-lib-options ["inputs" "src"];
     in
       lib.mkFlake flake-options;
-  in {
-    inherit mkLib mkFlake;
+  in
+    {
+      inherit mkLib mkFlake;
 
-    nixosModules = {
-      user = ./modules/nixos/user/default.nix;
-    };
-
-    darwinModules = {
-      user = ./modules/darwin/user/default.nix;
-    };
-
-    homeModules = {
-      user = ./modules/home/user/default.nix;
-    };
-
-    formatter = {
-      x86_64-linux = inputs.nixpkgs.legacyPackages.x86_64-linux.alejandra;
-      aarch64-linux = inputs.nixpkgs.legacyPackages.aarch64-linux.alejandra;
-      x86_64-darwin = inputs.nixpkgs.legacyPackages.x86_64-darwin.alejandra;
-      aarch64-darwin = inputs.nixpkgs.legacyPackages.aarch64-darwin.alejandra;
-    };
-
-    snowfall = rec {
-      raw-config = config;
-
-      config = {
-        root = ./.;
-        src = ./.;
-        namespace = "snowfall";
-        lib-dir = "snowfall-lib";
-
-        meta = {
-          name = "snowfall-lib";
-          title = "Snowfall Lib";
-        };
+      nixosModules = {
+        user = ./modules/nixos/user/default.nix;
       };
 
-      internal-lib = let
-        lib = mkLib {
-          src = ./.;
+      darwinModules = {
+        user = ./modules/darwin/user/default.nix;
+      };
 
-          inputs =
-            inputs
-            // {
-              self = {};
-            };
+      homeModules = {
+        user = ./modules/home/user/default.nix;
+      };
+
+      formatter = {
+        x86_64-linux = inputs.nixpkgs.legacyPackages.x86_64-linux.alejandra;
+        aarch64-linux = inputs.nixpkgs.legacyPackages.aarch64-linux.alejandra;
+        x86_64-darwin = inputs.nixpkgs.legacyPackages.x86_64-darwin.alejandra;
+        aarch64-darwin = inputs.nixpkgs.legacyPackages.aarch64-darwin.alejandra;
+      };
+
+      snowfall = rec {
+        raw-config = config;
+
+        config = {
+          root = ./.;
+          src = ./.;
+          namespace = "snowfall";
+          lib-dir = "snowfall-lib";
+
+          meta = {
+            name = "snowfall-lib";
+            title = "Snowfall Lib";
+          };
         };
-      in
-        builtins.removeAttrs
-        lib.snowfall
-        ["internal"];
-    };
-  };
+
+        internal-lib = let
+          lib = mkLib {
+            src = ./.;
+
+            inputs =
+              inputs
+              // {
+                self = {};
+              };
+          };
+        in
+          builtins.removeAttrs
+          lib.snowfall
+          ["internal"];
+      };
+    }
+    // (
+      inputs.flake-utils-plus.lib.eachDefaultSystem (
+        system:
+          with import inputs.nixpkgs {
+            inherit system;
+          }; {
+            devShells.default = mkShell {
+              packages = [nil alejandra];
+            };
+          }
+      )
+    );
 }
