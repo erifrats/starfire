@@ -1,8 +1,8 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (builtins) toString baseNameOf dirOf concatStringsSep;
   inherit (core-inputs.nixpkgs.lib) assertMsg last init;
@@ -23,7 +23,7 @@ in {
     split-file-extension = file: let
       match = builtins.match file-name-regex file;
     in
-      assert assertMsg (match != null) "lib.snowfall.split-file-extension: File must have an extension to split."; match;
+      assert assertMsg (match != null) "lib.starfire.split-file-extension: File must have an extension to split."; match;
 
     ## Check if a file name has a file extension.
     ## Example Usage:
@@ -83,7 +83,7 @@ in {
     ## "/a/b"
     ## ```
     #@ Path -> Path
-    get-parent-directory = snowfall-lib.fp.compose baseNameOf dirOf;
+    get-parent-directory = starfire-lib.fp.compose baseNameOf dirOf;
 
     ## Get the file name of a path without its extension.
     ## Example Usage:

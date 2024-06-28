@@ -1,8 +1,8 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit
     (core-inputs.nixpkgs.lib)
@@ -28,8 +28,8 @@
     hasSuffix
     ;
 
-  user-homes-root = snowfall-lib.fs.get-snowfall-file "homes";
-  user-modules-root = snowfall-lib.fs.get-snowfall-file "modules";
+  user-homes-root = starfire-lib.fs.get-starfire-file "homes";
+  user-modules-root = starfire-lib.fs.get-starfire-file "modules";
 in {
   home = rec {
     # Modules in home-manager expect `hm` to be available directly on `lib` itself.
@@ -38,14 +38,14 @@ in {
       # not exist.
       if user-inputs ? home-manager
       then
-        snowfall-lib.internal.system-lib.extend
+        starfire-lib.internal.system-lib.extend
         (final: prev:
           # NOTE: This order is important, this library's extend and other utilities must write
           # _over_ the original `system-lib`.
-            snowfall-lib.internal.system-lib
+            starfire-lib.internal.system-lib
             // prev
             // {
-              hm = snowfall-lib.internal.system-lib.home-manager.hm;
+              hm = starfire-lib.internal.system-lib.home-manager.hm;
             })
       else {};
 
@@ -84,7 +84,7 @@ in {
     #@ Attrs -> Attrs
     create-home = {
       path,
-      name ? builtins.unsafeDiscardStringContext (snowfall-lib.system.get-inferred-system-name path),
+      name ? builtins.unsafeDiscardStringContext (starfire-lib.system.get-inferred-system-name path),
       modules ? [],
       specialArgs ? {},
       channelName ? "nixpkgs",
@@ -97,7 +97,7 @@ in {
       lib = home-lib;
     in
       assert assertMsg (user-inputs ? home-manager) "In order to create home-manager configurations, you must include `home-manager` as a flake input.";
-      assert assertMsg ((user-metadata.host != "") || !(hasInfix "@" name)) "Snowfall Lib homes must be named with the format: user@system"; {
+      assert assertMsg ((user-metadata.host != "") || !(hasInfix "@" name)) "Starfire Lib homes must be named with the format: user@system"; {
         inherit channelName system;
 
         output = "homeConfigurations";
@@ -115,8 +115,8 @@ in {
 
           format = "home";
 
-          inputs = snowfall-lib.flake.without-src user-inputs;
-          namespace = snowfall-config.namespace;
+          inputs = starfire-lib.flake.without-src user-inputs;
+          namespace = starfire-config.namespace;
 
           # NOTE: home-manager has trouble with `pkgs` recursion if it isn't passed in here.
           inherit pkgs lib;
@@ -137,7 +137,7 @@ in {
                         inherit user-inputs core-inputs;
                       }))
                   {
-                    snowfallorg.user = {
+                    starfire.user = {
                       name = mkDefault user-metadata.user;
                       enable = mkDefault true;
                     };
@@ -159,7 +159,7 @@ in {
     ## ```
     #@ String -> [Attrs]
     get-target-homes-metadata = target: let
-      homes = snowfall-lib.fs.get-directories target;
+      homes = starfire-lib.fs.get-directories target;
       existing-homes = builtins.filter (home: builtins.pathExists "${home}/default.nix") homes;
       create-home-metadata = path: {
         path = "${path}/default.nix";
@@ -187,10 +187,10 @@ in {
     ## ```
     #@ Attrs -> Attrs
     create-homes = homes: let
-      targets = snowfall-lib.fs.get-directories user-homes-root;
+      targets = starfire-lib.fs.get-directories user-homes-root;
       target-homes-metadata = concatMap get-target-homes-metadata targets;
 
-      user-home-modules = snowfall-lib.module.create-modules {
+      user-home-modules = starfire-lib.module.create-modules {
         src = "${user-modules-root}/home";
       };
 
@@ -230,7 +230,7 @@ in {
     #@ Attrs -> [Module]
     create-home-system-modules = users: let
       created-users = create-homes users;
-      user-home-modules = snowfall-lib.module.create-modules {
+      user-home-modules = starfire-lib.module.create-modules {
         src = "${user-modules-root}/home";
       };
 
@@ -249,8 +249,8 @@ in {
         })
         user-home-modules;
 
-      snowfall-user-home-module = {
-        _file = "virtual:snowfallorg/modules/home/user/default.nix";
+      starfire-user-home-module = {
+        _file = "virtual:starfire/modules/home/user/default.nix";
 
         config = {
           home-manager.sharedModules = [
@@ -266,11 +266,11 @@ in {
         target ? system,
         format ? "home",
         host ? "",
-        virtual ? (snowfall-lib.system.is-virtual target),
+        virtual ? (starfire-lib.system.is-virtual target),
         systems ? {},
         ...
       }: {
-        _file = "virtual:snowfallorg/home/extra-special-args";
+        _file = "virtual:starfire/home/extra-special-args";
 
         config = {
           home-manager.extraSpecialArgs = {
@@ -278,7 +278,7 @@ in {
 
             lib = home-lib;
 
-            inputs = snowfall-lib.flake.without-src user-inputs;
+            inputs = starfire-lib.flake.without-src user-inputs;
           };
         };
       };
@@ -305,7 +305,7 @@ in {
                 || (created-user.specialArgs.host == "" && created-user.specialArgs.system == system);
 
               # NOTE: To conform to the config structure of home-manager, we have to
-              # remap the options coming from `snowfallorg.user.<name>.home.config` since `mkAliasDefinitions`
+              # remap the options coming from `starfire.user.<name>.home.config` since `mkAliasDefinitions`
               # does not let us target options within a submodule.
               wrap-user-options = user-option:
                 if (user-option ? "_type") && user-option._type == "merge"
@@ -323,23 +323,23 @@ in {
                 else
                   (builtins.trace ''
                     =============
-                    Snowfall Lib:
-                    Option value for `snowfallorg.users.${user-name}` was not detected to be merged.
+                    Starfire Lib:
+                    Option value for `starfire.users.${user-name}` was not detected to be merged.
 
                     Please report the issue on GitHub with a link to your configuration so we can debug the problem:
-                      https://github.com/snowfallorg/lib/issues/new
+                      https://github.com/starfire/lib/issues/new
                     =============
                   '')
                   user-option;
 
-              home-config = mkAliasAndWrapDefinitions wrap-user-options options.snowfallorg.users;
+              home-config = mkAliasAndWrapDefinitions wrap-user-options options.starfire.users;
             in {
-              _file = "virtual:snowfallorg/home/user/${name}";
+              _file = "virtual:starfire/home/user/${name}";
 
               config = mkIf host-matches {
                 # Initialize user information.
-                snowfallorg.users.${user-name}.home.config = {
-                  snowfallorg.user = {
+                starfire.users.${user-name}.home.config = {
+                  starfire.user = {
                     enable = mkDefault true;
                     name = mkDefault user-name;
                   };
@@ -348,13 +348,13 @@ in {
                   # However, not all specialArgs values can be set when using `_module.args`.
                   _module.args = builtins.removeAttrs ((users.users.${name}.specialArgs or {})
                     // {
-                      namespace = snowfall-config.namespace;
+                      namespace = starfire-config.namespace;
                     })
                   ["options" "config" "lib" "pkgs" "specialArgs" "host"];
                 };
 
                 home-manager = {
-                  users.${user-name} = mkIf config.snowfallorg.users.${user-name}.home.enable ({pkgs, ...}: {
+                  users.${user-name} = mkIf config.starfire.users.${user-name}.home.enable ({pkgs, ...}: {
                     imports = (home-config.imports or []) ++ other-modules ++ [user-module];
                     config = builtins.removeAttrs home-config ["imports"];
                   });
@@ -370,7 +370,7 @@ in {
     in
       [
         extra-special-args-module
-        snowfall-user-home-module
+        starfire-user-home-module
       ]
       ++ shared-modules
       ++ shared-user-modules

@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (core-inputs.flake-utils-plus.lib) filterPackages allSystems;
   inherit (core-inputs.nixpkgs.lib) assertMsg foldl mapAttrs filterAttrs callPackageWith;
 
-  user-packages-root = snowfall-lib.fs.get-snowfall-file "packages";
+  user-packages-root = starfire-lib.fs.get-starfire-file "packages";
 in {
   package = rec {
     ## Create flake output packages.
@@ -26,9 +26,9 @@ in {
       pkgs ? channels.nixpkgs,
       overrides ? {},
       alias ? {},
-      namespace ? snowfall-config.namespace,
+      namespace ? starfire-config.namespace,
     }: let
-      user-packages = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-packages = starfire-lib.fs.get-default-nix-files-recursive src;
       create-package-metadata = package: let
         namespaced-packages = {
           ${namespace} = packages-without-aliases;
@@ -38,12 +38,12 @@ in {
           // namespaced-packages
           // {
             inherit channels namespace;
-            lib = snowfall-lib.internal.system-lib;
+            lib = starfire-lib.internal.system-lib;
             pkgs = pkgs // namespaced-packages;
             inputs = user-inputs;
           };
       in {
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory package);
+        name = builtins.unsafeDiscardStringContext (starfire-lib.path.get-parent-directory package);
         drv = let
           pkg = callPackageWith extra-inputs package {};
         in
@@ -52,7 +52,7 @@ in {
             meta =
               (pkg.meta or {})
               // {
-                snowfall = {
+                starfire = {
                   path = package;
                 };
               };

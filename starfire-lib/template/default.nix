@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (builtins) baseNameOf;
   inherit (core-inputs.nixpkgs.lib) assertMsg foldl mapAttrs;
 
-  user-templates-root = snowfall-lib.fs.get-snowfall-file "templates";
+  user-templates-root = starfire-lib.fs.get-starfire-file "templates";
 in {
   template = {
     ## Create flake templates.
@@ -27,7 +27,7 @@ in {
       overrides ? {},
       alias ? {},
     }: let
-      user-templates = snowfall-lib.fs.get-directories src;
+      user-templates = starfire-lib.fs.get-directories src;
       create-template-metadata = template: {
         name = builtins.unsafeDiscardStringContext (baseNameOf template);
         path = template;

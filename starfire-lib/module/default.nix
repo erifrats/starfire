@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (builtins) baseNameOf;
   inherit (core-inputs.nixpkgs.lib) foldl mapAttrs hasPrefix hasSuffix isFunction splitString tail;
 
-  user-modules-root = snowfall-lib.fs.get-snowfall-file "modules";
+  user-modules-root = starfire-lib.fs.get-starfire-file "modules";
 in {
   module = {
     ## Create flake output modules.
@@ -25,7 +25,7 @@ in {
       overrides ? {},
       alias ? {},
     }: let
-      user-modules = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-modules = starfire-lib.fs.get-default-nix-files-recursive src;
       create-module-metadata = module: {
         name = let
           path-name = builtins.replaceStrings [(builtins.toString src) "/default.nix"] ["" ""] (builtins.unsafeDiscardStringContext module);
@@ -46,27 +46,27 @@ in {
             target = args.target or system;
 
             format = let
-              virtual-system-type = snowfall-lib.system.get-virtual-system-type target;
+              virtual-system-type = starfire-lib.system.get-virtual-system-type target;
             in
               if virtual-system-type != ""
               then virtual-system-type
-              else if snowfall-lib.system.is-darwin target
+              else if starfire-lib.system.is-darwin target
               then "darwin"
               else "linux";
 
-            # Replicates the specialArgs from Snowfall Lib's system builder.
+            # Replicates the specialArgs from Starfire Lib's system builder.
             modified-args =
               args
               // {
                 inherit system target format;
-                virtual = args.virtual or (snowfall-lib.system.get-virtual-system-type target != "");
+                virtual = args.virtual or (starfire-lib.system.get-virtual-system-type target != "");
                 systems = args.systems or {};
 
-                lib = snowfall-lib.internal.system-lib;
+                lib = starfire-lib.internal.system-lib;
                 pkgs = user-inputs.self.pkgs.${system}.nixpkgs;
 
-                inputs = snowfall-lib.flake.without-src user-inputs;
-                namespace = snowfall-config.namespace;
+                inputs = starfire-lib.flake.without-src user-inputs;
+                namespace = starfire-config.namespace;
               };
             imported-user-module = import metadata.path;
             user-module =

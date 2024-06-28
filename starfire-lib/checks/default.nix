@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (core-inputs.flake-utils-plus.lib) filterPackages;
   inherit (core-inputs.nixpkgs.lib) assertMsg foldl mapAttrs callPackageWith;
 
-  user-checks-root = snowfall-lib.fs.get-snowfall-file "checks";
+  user-checks-root = starfire-lib.fs.get-starfire-file "checks";
 in {
   check = {
     ## Create flake output packages.
@@ -27,18 +27,18 @@ in {
       overrides ? {},
       alias ? {},
     }: let
-      user-checks = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-checks = starfire-lib.fs.get-default-nix-files-recursive src;
       create-check-metadata = check: let
         extra-inputs =
           pkgs
           // {
             inherit channels;
-            lib = snowfall-lib.internal.system-lib;
-            inputs = snowfall-lib.flake.without-src user-inputs;
-            namespace = snowfall-config.namespace;
+            lib = starfire-lib.internal.system-lib;
+            inputs = starfire-lib.flake.without-src user-inputs;
+            namespace = starfire-config.namespace;
           };
       in {
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory check);
+        name = builtins.unsafeDiscardStringContext (starfire-lib.path.get-parent-directory check);
         drv = callPackageWith extra-inputs check {};
       };
       checks-metadata = builtins.map create-check-metadata user-checks;

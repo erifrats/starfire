@@ -1,5 +1,5 @@
 {
-  description = "Snowfall Lib";
+  description = "Starfire Lib";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/release-23.11";
@@ -26,7 +26,7 @@
     # `lib.flake-utils-plus.mkApp`.
     # Usage: mkLib { inherit inputs; src = ./.; }
     #   result: lib
-    mkLib = import ./snowfall-lib core-inputs;
+    mkLib = import ./starfire-lib core-inputs;
 
     # A convenience wrapper to create the library and then call `lib.mkFlake`.
     # Usage: mkFlake { inherit inputs; src = ./.; ... }
@@ -34,11 +34,11 @@
     mkFlake = flake-and-lib-options @ {
       inputs,
       src,
-      snowfall ? {},
+      starfire ? {},
       ...
     }: let
       lib = mkLib {
-        inherit inputs src snowfall;
+        inherit inputs src starfire;
       };
       flake-options = builtins.removeAttrs flake-and-lib-options ["inputs" "src"];
     in
@@ -66,18 +66,18 @@
         aarch64-darwin = inputs.nixpkgs.legacyPackages.aarch64-darwin.alejandra;
       };
 
-      snowfall = rec {
+      starfire = rec {
         raw-config = config;
 
         config = {
           root = ./.;
           src = ./.;
-          namespace = "snowfall";
-          lib-dir = "snowfall-lib";
+          namespace = "starfire";
+          lib-dir = "starfire-lib";
 
           meta = {
-            name = "snowfall-lib";
-            title = "Snowfall Lib";
+            name = "starfire-lib";
+            title = "starfire Lib";
           };
         };
 
@@ -93,7 +93,7 @@
           };
         in
           builtins.removeAttrs
-          lib.snowfall
+          lib.starfire
           ["internal"];
       };
     }

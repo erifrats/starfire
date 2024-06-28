@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (core-inputs.nixpkgs.lib) assertMsg foldl concatStringsSep;
 
-  user-overlays-root = snowfall-lib.fs.get-snowfall-file "overlays";
-  user-packages-root = snowfall-lib.fs.get-snowfall-file "packages";
+  user-overlays-root = starfire-lib.fs.get-starfire-file "overlays";
+  user-packages-root = starfire-lib.fs.get-starfire-file "packages";
 in {
   overlay = {
     ## Create a flake-utils-plus overlays builder.
@@ -22,10 +22,10 @@ in {
     #@ Attrs -> Attrs -> [(a -> b -> c)]
     create-overlays-builder = {
       src ? user-overlays-root,
-      namespace ? snowfall-config.namespace,
+      namespace ? starfire-config.namespace,
       extra-overlays ? [],
     }: channels: let
-      user-overlays = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-overlays = starfire-lib.fs.get-default-nix-files-recursive src;
       create-overlay = overlay:
         import overlay (
           # Deprecated: Use `inputs.*` instead of referencing the input name directly.
@@ -33,11 +33,11 @@ in {
           // {
             inherit channels;
             inputs = user-inputs;
-            lib = snowfall-lib.internal.system-lib;
+            lib = starfire-lib.internal.system-lib;
           }
         );
       user-packages-overlay = final: prev: let
-        user-packages = snowfall-lib.package.create-packages {
+        user-packages = starfire-lib.package.create-packages {
           pkgs = final;
           inherit channels namespace;
         };
@@ -65,7 +65,7 @@ in {
     create-overlays = {
       src ? user-overlays-root,
       packages-src ? user-packages-root,
-      namespace ? snowfall-config.namespace,
+      namespace ? starfire-config.namespace,
       extra-overlays ? {},
     }: let
       fake-pkgs = {
@@ -75,12 +75,12 @@ in {
         system = "fake-system";
       };
 
-      user-overlays = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-overlays = starfire-lib.fs.get-default-nix-files-recursive src;
 
       channel-systems = user-inputs.self.pkgs;
 
       user-packages-overlay = final: prev: let
-        user-packages = snowfall-lib.package.create-packages {
+        user-packages = starfire-lib.package.create-packages {
           pkgs = final;
           channels = channel-systems.${prev.system};
           inherit namespace;
@@ -96,7 +96,7 @@ in {
 
       create-overlay = (
         overlays: file: let
-          name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory file);
+          name = builtins.unsafeDiscardStringContext (starfire-lib.path.get-parent-directory file);
           overlay = final: prev: let
             channels = channel-systems.${prev.system};
             user-overlay = import file (
@@ -105,7 +105,7 @@ in {
               // {
                 inherit channels namespace;
                 inputs = user-inputs;
-                lib = snowfall-lib.internal.system-lib;
+                lib = starfire-lib.internal.system-lib;
               }
             );
             packages = user-packages-overlay final prev;
@@ -146,13 +146,13 @@ in {
         {}
         user-overlays;
 
-      user-packages = snowfall-lib.fs.get-default-nix-files-recursive packages-src;
+      user-packages = starfire-lib.fs.get-default-nix-files-recursive packages-src;
 
       create-package-overlay = package-overlays: file: let
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory file);
+        name = builtins.unsafeDiscardStringContext (starfire-lib.path.get-parent-directory file);
         overlay = final: prev: let
           channels = channel-systems.${prev.system};
-          packages = snowfall-lib.package.create-packages {
+          packages = starfire-lib.package.create-packages {
             inherit namespace;
             channels = channel-systems.${prev.system};
           };
@@ -184,7 +184,7 @@ in {
         package-overlays-results = builtins.map (overlay: overlay final prev) package-overlays-list;
 
         merged-results =
-          snowfall-lib.attrs.merge-shallow-packages
+          starfire-lib.attrs.merge-shallow-packages
           (package-overlays-results ++ overlays-results);
       in
         merged-results;

@@ -7,7 +7,7 @@ inputs @ {
 }: let
   inherit (lib) types mkOption mkIf mkDefault;
 
-  cfg = config.snowfallorg;
+  cfg = config.starfire;
 
   # NOTE: The module system chokes if it finds `osConfig` named in the module arguments
   # when being used in standalone home-manager. To remedy this, we have to refer to the arguments set directly.
@@ -22,7 +22,7 @@ inputs @ {
     then "/Users/${cfg.user.name}"
     else "/home/${cfg.user.name}";
 in {
-  options.snowfallorg = {
+  options.starfire = {
     user = {
       enable = mkOption {
         type = types.bool;

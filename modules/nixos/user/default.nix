@@ -16,7 +16,7 @@ args @ {
     optional
     ;
 
-  cfg = config.snowfallorg;
+  cfg = config.starfire;
 
   inputs = args.inputs or {};
 
@@ -40,10 +40,10 @@ args @ {
     });
 in {
   imports = [
-    (mkRenamedOptionModule ["snowfallorg" "user"] ["snowfallorg" "users"])
+    (mkRenamedOptionModule ["starfire" "user"] ["starfire" "users"])
   ];
 
-  options.snowfallorg = {
+  options.starfire = {
     users = mkOption {
       description = "User configuration.";
       default = {};

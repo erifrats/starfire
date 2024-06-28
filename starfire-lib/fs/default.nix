@@ -1,8 +1,8 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (builtins) readDir pathExists;
   inherit (core-inputs) flake-utils-plus;
@@ -38,17 +38,17 @@ in {
     #@ String -> String
     get-file = path: "${user-inputs.src}/${path}";
 
-    ## Get a file path relative to the user's snowfall directory.
+    ## Get a file path relative to the user's starfire directory.
     ## Example Usage:
     ## ```nix
-    ## get-snowfall-file "systems"
+    ## get-starfire-file "systems"
     ## ```
     ## Result:
     ## ```nix
-    ## "/user-source/snowfall-dir/systems"
+    ## "/user-source/starfire-dir/systems"
     ## ```
     #@ String -> String
-    get-snowfall-file = path: "${snowfall-config.root}/${path}";
+    get-starfire-file = path: "${starfire-config.root}/${path}";
 
     ## Get a file path relative to the this flake.
     ## Example Usage:
@@ -132,7 +132,7 @@ in {
         then get-files-recursive path'
         else path';
       files =
-        snowfall-lib.attrs.map-concat-attrs-to-list
+        starfire-lib.attrs.map-concat-attrs-to-list
         map-file
         filtered-entries;
     in
@@ -150,7 +150,7 @@ in {
     #@ Path -> [Path]
     get-nix-files = path:
       builtins.filter
-      (snowfall-lib.path.has-file-extension "nix")
+      (starfire-lib.path.has-file-extension "nix")
       (get-files path);
 
     ## Get nix files at a given path, traversing any directories within.
@@ -165,7 +165,7 @@ in {
     #@ Path -> [Path]
     get-nix-files-recursive = path:
       builtins.filter
-      (snowfall-lib.path.has-file-extension "nix")
+      (starfire-lib.path.has-file-extension "nix")
       (get-files-recursive path);
 
     ## Get nix files at a given path named "default.nix".
@@ -212,7 +212,7 @@ in {
       builtins.filter
       (
         name:
-          (snowfall-lib.path.has-file-extension "nix" name)
+          (starfire-lib.path.has-file-extension "nix" name)
           && (builtins.baseNameOf name != "default.nix")
       )
       (get-files path);
@@ -231,7 +231,7 @@ in {
       builtins.filter
       (
         name:
-          (snowfall-lib.path.has-file-extension "nix" name)
+          (starfire-lib.path.has-file-extension "nix" name)
           && (builtins.baseNameOf name != "default.nix")
       )
       (get-files-recursive path);

@@ -1,8 +1,8 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (core-inputs.nixpkgs.lib) assertMsg foldl filterAttrs const;
 in rec {
@@ -34,26 +34,26 @@ in rec {
     ## Remove the `src` and `self` attributes from an attribute set.
     ## Example Usage:
     ## ```nix
-    ## without-snowfall-inputs { self = {}; src = ./.; x = true; }
+    ## without-starfire-inputs { self = {}; src = ./.; x = true; }
     ## ```
     ## Result:
     ## ```nix
     ## { x = true; }
     ## ```
     #@ Attrs -> Attrs
-    without-snowfall-inputs = snowfall-lib.fp.compose without-self without-src;
+    without-starfire-inputs = starfire-lib.fp.compose without-self without-src;
 
-    ## Remove Snowfall-specific attributes so the rest can be safely passed to flake-utils-plus.
+    ## Remove Starfire-specific attributes so the rest can be safely passed to flake-utils-plus.
     ## Example Usage:
     ## ```nix
-    ## without-snowfall-options { src = ./.; x = true; }
+    ## without-starfire-options { src = ./.; x = true; }
     ## ```
     ## Result:
     ## ```nix
     ## { x = true; }
     ## ```
     #@ Attrs -> Attrs
-    without-snowfall-options = flake-options:
+    without-starfire-options = flake-options:
       builtins.removeAttrs
       flake-options
       [
@@ -70,7 +70,7 @@ in rec {
         "templates"
         "checks"
         "alias"
-        "snowfall"
+        "starfire"
       ];
 
     ## Transform an attribute set of inputs into an attribute set where the values are the inputs' `lib` attribute. Entries without a `lib` attribute are removed.
@@ -96,35 +96,35 @@ in rec {
   };
 
   mkFlake = full-flake-options: let
-    namespace = snowfall-config.namespace or "internal";
-    custom-flake-options = flake.without-snowfall-options full-flake-options;
+    namespace = starfire-config.namespace or "internal";
+    custom-flake-options = flake.without-starfire-options full-flake-options;
     alias = full-flake-options.alias or {};
-    homes = snowfall-lib.home.create-homes (full-flake-options.homes or {});
-    systems = snowfall-lib.system.create-systems {
+    homes = starfire-lib.home.create-homes (full-flake-options.homes or {});
+    systems = starfire-lib.system.create-systems {
       systems = full-flake-options.systems or {};
       homes = full-flake-options.homes or {};
     };
-    hosts = snowfall-lib.attrs.merge-shallow [(full-flake-options.systems.hosts or {}) systems homes];
-    templates = snowfall-lib.template.create-templates {
+    hosts = starfire-lib.attrs.merge-shallow [(full-flake-options.systems.hosts or {}) systems homes];
+    templates = starfire-lib.template.create-templates {
       overrides = full-flake-options.templates or {};
       alias = alias.templates or {};
     };
-    nixos-modules = snowfall-lib.module.create-modules {
-      src = snowfall-lib.fs.get-snowfall-file "modules/nixos";
+    nixos-modules = starfire-lib.module.create-modules {
+      src = starfire-lib.fs.get-starfire-file "modules/nixos";
       overrides = full-flake-options.modules.nixos or {};
       alias = alias.modules.nixos or {};
     };
-    darwin-modules = snowfall-lib.module.create-modules {
-      src = snowfall-lib.fs.get-snowfall-file "modules/darwin";
+    darwin-modules = starfire-lib.module.create-modules {
+      src = starfire-lib.fs.get-starfire-file "modules/darwin";
       overrides = full-flake-options.modules.darwin or {};
       alias = alias.modules.darwin or {};
     };
-    home-modules = snowfall-lib.module.create-modules {
-      src = snowfall-lib.fs.get-snowfall-file "modules/home";
+    home-modules = starfire-lib.module.create-modules {
+      src = starfire-lib.fs.get-starfire-file "modules/home";
       overrides = full-flake-options.modules.home or {};
       alias = alias.modules.home or {};
     };
-    overlays = snowfall-lib.overlay.create-overlays {
+    overlays = starfire-lib.overlay.create-overlays {
       inherit namespace;
       extra-overlays = full-flake-options.extra-exported-overlays or {};
     };
@@ -135,17 +135,17 @@ in rec {
         or full-flake-options.outputsBuilder
         or (const {});
       user-outputs = user-outputs-builder channels;
-      packages = snowfall-lib.package.create-packages {
+      packages = starfire-lib.package.create-packages {
         inherit channels namespace;
         overrides = (full-flake-options.packages or {}) // (user-outputs.packages or {});
         alias = alias.packages or {};
       };
-      shells = snowfall-lib.shell.create-shells {
+      shells = starfire-lib.shell.create-shells {
         inherit channels;
         overrides = (full-flake-options.shells or {}) // (user-outputs.devShells or {});
         alias = alias.shells or {};
       };
-      checks = snowfall-lib.check.create-checks {
+      checks = starfire-lib.check.create-checks {
         inherit channels;
         overrides = (full-flake-options.checks or {}) // (user-outputs.checks or {});
         alias = alias.checks or {};
@@ -157,7 +157,7 @@ in rec {
         devShells = shells;
       };
     in
-      snowfall-lib.attrs.merge-deep [user-outputs outputs];
+      starfire-lib.attrs.merge-deep [user-outputs outputs];
 
     flake-options =
       custom-flake-options
@@ -165,8 +165,8 @@ in rec {
         inherit hosts templates;
         inherit (user-inputs) self;
 
-        lib = snowfall-lib.internal.user-lib;
-        inputs = snowfall-lib.flake.without-src user-inputs;
+        lib = starfire-lib.internal.user-lib;
+        inputs = starfire-lib.flake.without-src user-inputs;
 
         nixosModules = nixos-modules;
         darwinModules = darwin-modules;
@@ -174,17 +174,17 @@ in rec {
 
         channelsConfig = full-flake-options.channels-config or {};
 
-        channels.nixpkgs.overlaysBuilder = snowfall-lib.overlay.create-overlays-builder {
+        channels.nixpkgs.overlaysBuilder = starfire-lib.overlay.create-overlays-builder {
           inherit namespace;
           extra-overlays = full-flake-options.overlays or [];
         };
 
         outputsBuilder = outputs-builder;
 
-        snowfall = {
-          config = snowfall-config;
-          raw-config = full-flake-options.snowfall or {};
-          user-lib = snowfall-lib.internal.user-lib;
+        starfire = {
+          config = starfire-config;
+          raw-config = full-flake-options.starfire or {};
+          user-lib = starfire-lib.internal.user-lib;
         };
       };
 

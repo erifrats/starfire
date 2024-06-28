@@ -1,8 +1,8 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (builtins) baseNameOf dirOf;
   inherit (core-inputs.nixpkgs.lib) id foldr flip;

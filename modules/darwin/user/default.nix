@@ -16,7 +16,7 @@
     optionalAttrs
     ;
 
-  cfg = config.snowfallorg;
+  cfg = config.starfire;
 
   user-names = builtins.attrNames cfg.users;
 
@@ -32,10 +32,10 @@
     });
 in {
   imports = [
-    (mkRenamedOptionModule ["snowfallorg" "user"] ["snowfallorg" "users"])
+    (mkRenamedOptionModule ["starfire" "user"] ["starfire" "users"])
   ];
 
-  options.snowfallorg = {
+  options.starfire = {
     users = mkOption {
       description = "User configuration.";
       default = {};

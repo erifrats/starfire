@@ -1,18 +1,18 @@
 # NOTE: The role of this file is to bootstrap the
-# Snowfall library. There is some duplication shared between this
+# Starfire library. There is some duplication shared between this
 # file and the library itself due to the library needing to pass through
 # another extended library for its own applications.
 core-inputs: user-options: let
-  raw-snowfall-config = user-options.snowfall or {};
-  snowfall-config =
-    raw-snowfall-config
+  raw-starfire-config = user-options.starfire or {};
+  starfire-config =
+    raw-starfire-config
     // {
       src = user-options.src;
-      root = raw-snowfall-config.root or user-options.src;
-      namespace = raw-snowfall-config.namespace or "internal";
+      root = raw-starfire-config.root or user-options.src;
+      namespace = raw-starfire-config.namespace or "internal";
       meta = {
-        name = raw-snowfall-config.meta.name or null;
-        title = raw-snowfall-config.meta.title or null;
+        name = raw-starfire-config.meta.name or null;
+        title = raw-starfire-config.meta.title or null;
       };
     };
 
@@ -60,47 +60,47 @@ core-inputs: user-options: let
 
   # NOTE: This root is different to accommodate the creation
   # of a fake user-lib in order to run documentation on this flake.
-  snowfall-lib-root = "${core-inputs.src}/snowfall-lib";
-  snowfall-lib-dirs = let
-    files = builtins.readDir snowfall-lib-root;
+  starfire-lib-root = "${core-inputs.src}/starfire-lib";
+  starfire-lib-dirs = let
+    files = builtins.readDir starfire-lib-root;
     dirs = filterAttrs (name: kind: kind == "directory") files;
     names = builtins.attrNames dirs;
   in
     names;
 
-  snowfall-lib = fix (
-    snowfall-lib: let
+  starfire-lib = fix (
+    starfire-lib: let
       attrs = {
-        inherit snowfall-lib snowfall-config core-inputs user-inputs;
+        inherit starfire-lib starfire-config core-inputs user-inputs;
       };
       libs =
         builtins.map
-        (dir: import "${snowfall-lib-root}/${dir}" attrs)
-        snowfall-lib-dirs;
+        (dir: import "${starfire-lib-root}/${dir}" attrs)
+        starfire-lib-dirs;
     in
       merge-deep libs
   );
 
-  snowfall-top-level-lib = filterAttrs (name: value: !builtins.isAttrs value) snowfall-lib;
+  starfire-top-level-lib = filterAttrs (name: value: !builtins.isAttrs value) starfire-lib;
 
   base-lib = merge-shallow [
     core-inputs.nixpkgs.lib
     core-inputs-libs
     user-inputs-libs
-    snowfall-top-level-lib
-    {snowfall = snowfall-lib;}
+    starfire-top-level-lib
+    {starfire = starfire-lib;}
   ];
 
   user-lib-root = "${user-inputs.src}/lib";
-  user-lib-modules = snowfall-lib.fs.get-default-nix-files-recursive user-lib-root;
+  user-lib-modules = starfire-lib.fs.get-default-nix-files-recursive user-lib-root;
 
   user-lib = fix (
     user-lib: let
       attrs = {
         inherit (user-options) inputs;
-        snowfall-inputs = core-inputs;
-        namespace = snowfall-config.namespace;
-        lib = merge-shallow [base-lib {${snowfall-config.namespace} = user-lib;}];
+        starfire-inputs = core-inputs;
+        namespace = starfire-config.namespace;
+        lib = merge-shallow [base-lib {${starfire-config.namespace} = user-lib;}];
       };
       libs =
         builtins.map

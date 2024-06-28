@@ -1,16 +1,16 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  starfire-lib,
+  starfire-config,
 }: let
   inherit (builtins) dirOf baseNameOf;
   inherit (core-inputs.nixpkgs.lib) assertMsg fix hasInfix concatMap foldl optionals singleton;
 
   virtual-systems = import ./virtual-systems.nix;
 
-  user-systems-root = snowfall-lib.fs.get-snowfall-file "systems";
-  user-modules-root = snowfall-lib.fs.get-snowfall-file "modules";
+  user-systems-root = starfire-lib.fs.get-starfire-file "systems";
+  user-modules-root = starfire-lib.fs.get-starfire-file "modules";
 in {
   system = rec {
     ## Get the name of a system based on its file path.
@@ -24,8 +24,8 @@ in {
     ## ```
     #@ Path -> String
     get-inferred-system-name = path:
-      if snowfall-lib.path.has-file-extension "nix" path
-      then snowfall-lib.path.get-parent-directory path
+      if starfire-lib.path.has-file-extension "nix" path
+      then starfire-lib.path.get-parent-directory path
       else baseNameOf path;
 
     ## Check whether a named system is macOS.
@@ -97,7 +97,7 @@ in {
     ## ```
     #@ String -> [Attrs]
     get-target-systems-metadata = target: let
-      systems = snowfall-lib.fs.get-directories target;
+      systems = starfire-lib.fs.get-directories target;
       existing-systems = builtins.filter (system: builtins.pathExists "${system}/default.nix") systems;
       create-system-metadata = path: {
         path = "${path}/default.nix";
@@ -240,8 +240,8 @@ in {
       systems ? {},
       homes ? {},
     }: let
-      lib = snowfall-lib.internal.system-lib;
-      home-system-modules = snowfall-lib.home.create-home-system-modules homes;
+      lib = starfire-lib.internal.system-lib;
+      home-system-modules = starfire-lib.home.create-home-system-modules homes;
       home-manager-module =
         if is-darwin system
         then user-inputs.home-manager.darwinModules.home-manager
@@ -259,8 +259,8 @@ in {
           host = name;
 
           virtual = (get-virtual-system-type target) != "";
-          inputs = snowfall-lib.flake.without-src user-inputs;
-          namespace = snowfall-config.namespace;
+          inputs = starfire-lib.flake.without-src user-inputs;
+          namespace = starfire-config.namespace;
         };
     };
 
@@ -278,12 +278,12 @@ in {
       systems ? {},
       homes ? {},
     }: let
-      targets = snowfall-lib.fs.get-directories user-systems-root;
+      targets = starfire-lib.fs.get-directories user-systems-root;
       target-systems-metadata = concatMap get-target-systems-metadata targets;
-      user-nixos-modules = snowfall-lib.module.create-modules {
+      user-nixos-modules = starfire-lib.module.create-modules {
         src = "${user-modules-root}/nixos";
       };
-      user-darwin-modules = snowfall-lib.module.create-modules {
+      user-darwin-modules = starfire-lib.module.create-modules {
         src = "${user-modules-root}/darwin";
       };
       nixos-modules = systems.modules.nixos or [];
