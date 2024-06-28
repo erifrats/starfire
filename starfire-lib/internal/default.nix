@@ -25,6 +25,7 @@
   user-lib = fix (
     user-lib: let
       attrs = {
+        inherit (user-inputs) src;
         inputs = starfire-lib.flake.without-starfire-inputs user-inputs;
         starfire-inputs = core-inputs;
         namespace = starfire-config.namespace;

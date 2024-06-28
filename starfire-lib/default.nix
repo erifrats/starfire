@@ -97,7 +97,7 @@ core-inputs: user-options: let
   user-lib = fix (
     user-lib: let
       attrs = {
-        inherit (user-options) inputs;
+        inherit (user-options) inputs src;
         starfire-inputs = core-inputs;
         namespace = starfire-config.namespace;
         lib = merge-shallow [base-lib {${starfire-config.namespace} = user-lib;}];
