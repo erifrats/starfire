@@ -58,7 +58,7 @@ in {
           admin = mkOption {
             description = "Whether the user should be added to the wheel group.";
             type = types.bool;
-            default = true;
+            default = false;
           };
 
           home = {
