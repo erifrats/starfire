@@ -121,5 +121,6 @@ in {
 
   config = {
     users.users = foldl create-system-users {} user-names;
+    users.mutableUsers = mkDefault false;
   };
 }
