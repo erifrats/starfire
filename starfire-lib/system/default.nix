@@ -295,7 +295,7 @@ in {
           if is-darwin system-metadata.target
           then user-darwin-modules
           else user-nixos-modules;
-        user-modules-list = builtins.attrValues user-modules;
+        user-modules-list = (builtins.attrValues user-modules) ++ (starfire-lib.fs.get-default-nix-files user-modules-root);
         system-modules =
           if is-darwin system-metadata.target
           then darwin-modules
